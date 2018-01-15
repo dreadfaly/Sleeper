@@ -1,0 +1,6 @@
+# author: dreadfaly, github: https://github.com/dreadfaly, email: dreadfaly@yandex.ru
+# ENG lang: flood - 'Flood? If it's not, go to the server!', message_sleep - 'Player {player} goes to bed. In the {player_sleep} bed of {online} players.'
+# RUS lang: flood - 'Флудите? Если это не так, перезайдите на сервер!', message_sleep - 'Игрок {player} ложится спать. В кровати {player_sleep} из {online} игроков.'
+
+flood: '&4Флудите? Если это не так, перезайдите на сервер!'
+message_sleep: '&6Игрок &a{player} &6 ложится спать. В кровати &a{sleep} &6из &a{online} &6игроков.'

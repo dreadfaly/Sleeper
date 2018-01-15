@@ -9,36 +9,36 @@ import org.bukkit.event.player.PlayerBedEnterEvent;
 import org.bukkit.event.player.PlayerBedLeaveEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 import org.bukkit.plugin.java.JavaPlugin;
+import java.io.File;
 import java.util.HashMap;
 
 public class Sleeper extends JavaPlugin implements Listener{
 
-    HashMap<Player, Long> dont_flood = new HashMap<Player, Long>();
-    private long player_sleep;
+    private int sleep_players;
+    HashMap<Player, Integer> attempts = new HashMap<Player, Integer>();
 
     public void onEnable() {
-        this.getLogger().info("Плагин Sleeper включен. Версия: 0.1");
+        File config = new File(getDataFolder(), "config.yml");
+        if(!config.exists()) {
+            getLogger().info("Creating new file config...");
+            getConfig().options().copyDefaults(true);
+            saveDefaultConfig();
+        }
         Bukkit.getPluginManager().registerEvents(this, this);
         Bukkit.getOnlinePlayers();
-
     }
 
     @EventHandler
     public void SleepOn (PlayerBedEnterEvent event) {
+        sleep_players++;
         Player player = event.getPlayer();
-        player_sleep++;
-        if (dont_flood.get(player) == null) {
-            dont_flood.put(player, (long) 0);
-        }
-        long number_sleep = dont_flood.get(player);
-        dont_flood.put(player, number_sleep + 1);
-        if(number_sleep >=3) {
-            player.sendMessage(ChatColor.RED + "Флудите? Если это не так, то перезайдите на сервер!");
+        attempts.putIfAbsent(player, 0);
+        attempts.put(player, attempts.get(player) + 1);
+        if(attempts.get(player) >= 4) {
+            player.sendMessage(this.getConfig().getString("flood").replace("&", "§"));
         } else {
             for (Player players : Bukkit.getOnlinePlayers()) {
-                players.sendMessage(ChatColor.GOLD + "Игрок " + ChatColor.GREEN + player.getName()
-                        + ChatColor.GOLD + " ложится спать. В кровати " + ChatColor.GREEN + player_sleep
-                        + ChatColor.GOLD + " из " + ChatColor.GREEN + Bukkit.getOnlinePlayers().size()  + ChatColor.GOLD + " игроков");
+                players.sendMessage(this.getConfig().getString("message_sleep").replace("&", "§").replace("{player}", player.getDisplayName()).replace("{sleep}", Integer.toString(sleep_players)).replace("{online}", Integer.toString(Bukkit.getOnlinePlayers().size())));
             }
         }
     }
@@ -46,12 +46,12 @@ public class Sleeper extends JavaPlugin implements Listener{
     @EventHandler
     public void SleepOff (PlayerBedLeaveEvent event) {
         Player player = event.getPlayer();
-        player_sleep--;
+        sleep_players--;
     }
 
     @EventHandler
     public void IfFlood (PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        dont_flood.put(player, (long) 0);
+        attempts.put(player, 0);
     }
 }
